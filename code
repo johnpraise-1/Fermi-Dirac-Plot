@@ -1,0 +1,45 @@
+!pip install matplotlib pillow  # Install necessary libraries
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation, PillowWriter
+
+# Constants
+k_B = 1.38e-23  # Boltzmann constant in J/K
+E_f = 5e-21     # Fermi energy in J
+
+# Energy range (in joules)
+E = np.linspace(0, 1e-20, 500)
+
+# Function to calculate F(E) at a given temperature T
+def F_E(E, T):
+    return 1 / (1 + np.exp((E - E_f) / (k_B * T)))
+
+# Initialize figure and axis
+fig, ax = plt.subplots()
+line, = ax.plot(E, F_E(E, 300))  # Initial plot at room temperature (300K)
+ax.set_xlim(E[0], E[-1])
+ax.set_ylim(0, 1)
+ax.set_xlabel('Energy (J)')
+ax.set_ylabel('F(E)')
+ax.set_title('Fermi-Dirac Distribution')
+
+# Update function for animation
+def update(frame):
+    T = 50 + 20 * frame  # Vary temperature from 50K upwards
+    line.set_ydata(F_E(E, T))  # Update the y-data with new temperature
+    ax.set_title(f'Fermi-Dirac Distribution at T = {T:.1f} K')
+    return line,
+
+# Create animation
+ani = FuncAnimation(fig, update, frames=range(1, 100), blit=False)
+
+# Save animation as GIF
+gif_writer = PillowWriter(fps=20)  # Set FPS for the GIF
+ani.save("fermi_dirac_distribution.gif", writer=gif_writer)
+
+# Display the animated GIF in Colab
+# This might be slightly inaccurate, but try the following:
+from IPython.display import HTML
+HTML(ani.to_jshtml()) # or HTML(ani.to_html5_video())
+#Instead of plt.show(), use the above code for displaying the animation output within the Colab notebook.
